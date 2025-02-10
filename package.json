@@ -1,0 +1,12 @@
+{
+  "name": "sweet-winds",
+  "source": "src/index.html",
+  "version": "1.0.0",
+  "scripts": {
+    "serve": "parcel serve --no-hmr"
+  },
+  "author": "Nathan Starkey",
+  "devDependencies": {
+    "parcel": "^2.13.3"
+  }
+}
