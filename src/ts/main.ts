@@ -1,6 +1,6 @@
 import { Entity } from "./entity";
 import { Sandbox } from "./sandbox";
-import { toIso, toOrtho } from "./utils";
+import { toIso } from "./utils";
 import { Tilemap } from "./tilemap";
 import { moveEntity } from "./tilemap-collision";
 import { init, fps } from "./game-engine";
@@ -83,8 +83,14 @@ function draw() {
   // Align to the center of the screen
   ctx.translate(canvas.width / 2, canvas.height / 2);
 
-  // Debug scale the content
-  ctx.scale(2, 2);
+  // Determine how much content should be visible
+  {
+    let ratio = canvas.width / canvas.height;
+
+    if (ratio < 1) ratio = 1 / ratio;
+
+    ctx.scale(ratio, ratio);
+  }
 
   // Draw the sandbox
   game.draw(ctx);
