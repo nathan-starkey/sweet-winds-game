@@ -1,13 +1,11 @@
+import { SPRITE_HEIGHT, SPRITE_WIDTH } from "./constants";
 import { Entity } from "./entity";
-import { drawIsometricRowSpritesheet, DrawTileCallback, renderIsometricRowSpritesheet, renderIsometricTilemap } from "./isometric-rendering-engine";
-import { toScreenSpace } from "./math";
+import { drawIsometricRowSpritesheet, renderIsometricRowSpritesheet, renderIsometricTilemap } from "./isometric-rendering-engine";
 import { Tilemap } from "./tilemap";
 
 declare let tileFloor: HTMLImageElement;
 declare let tileBlock: HTMLImageElement;
 
-const SPRITE_WIDTH = 36;
-const SPRITE_HEIGHT = 36;
 const NO_TILEMAP = new Tilemap(0, 0);
 
 function createCanvasRenderingContext2D() {
@@ -75,11 +73,7 @@ export class Sandbox {
     for (let o of drawIsometricRowSpritesheet(ctx, this.tilemapFg.canvas, this.tilemap.width, this.tilemap.height)) {
       // Draw all entities with further depth than the current tilemap row
       while (entity && entity.x + entity.y - 2 < rowIndex) {
-        ctx.save();
-        ctx.scale(SPRITE_WIDTH / 2, SPRITE_HEIGHT / 2);
         entity.draw(ctx);
-        ctx.restore();
-
         entity = entities.pop();
       }
 
@@ -88,10 +82,5 @@ export class Sandbox {
 
     // Draw the remaining entities
     while (entities.length) entities.pop()!.draw(ctx);
-
-    // Debug
-    ctx.resetTransform();
-    ctx.scale(0.25, 0.25);
-    ctx.drawImage(this.tilemapFg.canvas, 0, 0);
   }
 }

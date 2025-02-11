@@ -1,7 +1,6 @@
-const { min, max, floor } = Math;
+import { SPRITE_HEIGHT, SPRITE_WIDTH } from "./constants";
 
-const SPRITE_WIDTH = 36;
-const SPRITE_HEIGHT = 36;
+const { min, max, floor } = Math;
 
 export type DrawTileCallback = (ctx: CanvasRenderingContext2D, tileX: number, tileY: number, destX: number, destY: number) => void;
 
