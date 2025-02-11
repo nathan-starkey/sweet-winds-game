@@ -3,7 +3,8 @@ import { Sandbox } from "./sandbox";
 import { toIso } from "./utils";
 import { Tilemap } from "./tilemap";
 import { moveEntity } from "./tilemap-collision";
-import { init, fps } from "./game-engine";
+import { init } from "./game-engine";
+import { Node, createNodeTree, debugDrawNodeTree, generateTilemap } from "./tilemap-generation";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
@@ -16,30 +17,22 @@ const player = new Entity();
 game.addEntity(player);
 
 // Debug tilemap generation code
-let tilemap: Tilemap = new Tilemap(0, 0);
+let nodes: Node[] = createNodeTree(20);
+let tilemap: Tilemap = generateTilemap(nodes); // new Tilemap(0, 0);
 
-{
-  let width = Math.floor(Math.random() * 48) + 16;
-  let height = Math.floor(Math.random() * 48) + 16;
+game.setTilemap(tilemap);
 
-  width = 128;
-  height = 128;
+// Debug spawn code
+let x = 0;
+let y = 0;
 
-  tilemap = new Tilemap(width, height);
-
-  for (let y = 0; y < tilemap.height; ++y) {
-    for (let x = 0; x < tilemap.width; ++x) {
-      let d = Math.hypot(x - tilemap.width / 2, y - tilemap.height / 2);
-
-      tilemap.put(x, y, Math.random() > d / tilemap.width * 2 ? 0 : 1);
-    }
-  }
-
-  player.x = width / 2;
-  player.y = height / 2;
-
-  game.setTilemap(tilemap);
+while (tilemap.at(x, y) == 1) {
+  x = Math.floor(Math.random() * tilemap.width);
+  y = Math.floor(Math.random() * tilemap.height);
 }
+
+player.x = x;
+player.y = y;
 
 function main() {
   init(update, draw);
@@ -101,11 +94,12 @@ function draw() {
   ctx.arc(0, 0, 2, 0, Math.PI * 2);
   ctx.fill();
 
+  ctx.resetTransform();
+
   // Debug draw an ortho minimap
   /*{
     let scale = 7;
 
-    ctx.resetTransform();
     ctx.scale(scale, scale);
 
     for (let y = 0; y < tilemap.height; ++y) {
@@ -120,16 +114,19 @@ function draw() {
   }*/
 
   // Debug display the FPS
-  {
-    ctx.resetTransform();
-
+  /*{
     ctx.fillStyle = "white";
     ctx.fillRect(8, 8, 16 * 10, 32)
 
     ctx.fillStyle = "black";
     ctx.font = "16px sans-serif";
     ctx.fillText(Math.floor(fps * 10) / 10 + " FPS", 16, 32)
-  }
+  }*/
+
+  // Debug display the tilemap generation
+  // ctx.scale(10, 10);
+  // ctx.translate(200, 200);
+  // debugDrawNodeTree(ctx, nodes);
 }
 
 window.addEventListener("load", main);

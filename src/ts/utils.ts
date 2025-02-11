@@ -1,6 +1,8 @@
 export const SPRITE_WIDTH = 36;
 export const SPRITE_HEIGHT = 36;
 
+const { abs, sign } = Math;
+
 type Tuple2<T> = [T, T];
 
 export const toOrtho = (function () {
@@ -38,3 +40,24 @@ export const toWorld = (function () {
     x * m01 + y * m11
   ] as Tuple2<number>;
 } ());
+
+/** Yield points on a vector at fixed intervals determined by the gradient. */
+export function* vector(run: number, rise: number): Generator<[x: number, y: number]> {
+  let swap = abs(rise) > abs(run);
+
+  if (swap) [run, rise] = [rise, run];
+
+  let gradient = rise / abs(run);
+  let direction = sign(run);
+  let length = abs(run);
+
+  for (let i = 0; i <= length; ++i) {
+    let x = i * direction;
+    let y = i * gradient;
+
+    yield swap ? [y, x] : [x, y];
+  }
+}
+
+//@ts-expect-error
+window.vector = vector;
