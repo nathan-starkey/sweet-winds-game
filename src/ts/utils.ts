@@ -1,41 +1,40 @@
-import { Entity } from "./entity";
-import { Tilemap } from "./tilemap";
+export const SPRITE_WIDTH = 36;
+export const SPRITE_HEIGHT = 36;
 
-const { floor, ceil } = Math;
+type Tuple2<T> = [T, T];
 
-type Edge = "left" | "top" | "right" | "bottom";
+export const toOrtho = (function () {
+  let m00 = 1;
+  let m01 = 0.5;
+  let m10 = -1;
+  let m11 = 0.5;
 
-export function* iterateEntityEdge(entity: Entity, edge: Edge): Generator<[x: number, y: number]> {
-  let left = floor(entity.x - entity.width / 2);
-  let top = floor(entity.y - entity.height / 2);
-  let right = ceil(entity.x + entity.width / 2) - 1;
-  let bottom = ceil(entity.y + entity.height / 2) - 1;
+  return (x: number, y: number) => [
+    x * m00 + y * m10,
+    x * m01 + y * m11
+  ] as Tuple2<number>;
+} ());
 
-  if (edge == "left") {
-    for (let y = top; y <= bottom; ++y) yield [left, y];
-  } else if (edge == "top") {
-    for (let x = left; x <= right; ++x) yield [x, top];
-  } else if (edge == "right") {
-    for (let y = top; y <= bottom; ++y) yield [right, y];
-  } else {
-    for (let x = left; x <= right; ++x) yield [x, bottom];
-  }
-}
+export const toIso = (function () {
+  let m00 = 0.5;
+  let m01 = -0.5;
+  let m10 = 1;
+  let m11 = 1;
 
-export function entityHasEdgeCollision(tilemap: Tilemap, entity: Entity, edge: Edge) {
-  for (let [x, y] of iterateEntityEdge(entity, edge)) if (tilemap.at(x, y) == 1) return true;
+  return (x: number, y: number) => [
+    x * m00 + y * m10,
+    x * m01 + y * m11
+  ] as Tuple2<number>;
+} ());
 
-  return false;
-}
+export const toWorld = (function () {
+  let m00 = SPRITE_WIDTH / 2;
+  let m01 = SPRITE_HEIGHT / 4;
+  let m10 = SPRITE_WIDTH / -2;
+  let m11 = SPRITE_HEIGHT / 4;
 
-export function alignEntityEdge(entity: Entity, edge: Edge) {
-  if (edge == "left") {
-    entity.x = floor(entity.x - entity.width / 2) + entity.width / 2 + 1;
-  } else if (edge == "top") {
-    entity.y = floor(entity.y - entity.height / 2) + entity.height / 2 + 1;
-  } else if (edge == "right") {
-    entity.x = floor(entity.x + entity.width / 2) - entity.width / 2;
-  } else {
-    entity.y = floor(entity.y + entity.height / 2) - entity.height / 2;
-  }
-}
+  return (x: number, y: number) => [
+    x * m00 + y * m10,
+    x * m01 + y * m11
+  ] as Tuple2<number>;
+} ());

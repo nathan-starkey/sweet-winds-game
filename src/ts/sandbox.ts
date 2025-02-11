@@ -1,4 +1,4 @@
-import { SPRITE_HEIGHT, SPRITE_WIDTH } from "./constants";
+import { SPRITE_HEIGHT, SPRITE_WIDTH } from "./utils";
 import { Entity } from "./entity";
 import { drawIsometricRowSpritesheet, renderIsometricRowSpritesheet, renderIsometricTilemap } from "./isometric-rendering-engine";
 import { Tilemap } from "./tilemap";

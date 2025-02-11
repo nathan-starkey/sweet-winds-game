@@ -1,15 +1,14 @@
 import { Entity } from "./entity";
 import { Sandbox } from "./sandbox";
-import { toIso, toOrtho } from "./math";
+import { toIso, toOrtho } from "./utils";
 import { Tilemap } from "./tilemap";
-import { alignEntityEdge, entityHasEdgeCollision, iterateEntityEdge } from "./utils";
+import { moveEntity } from "./tilemap-collision";
+import { init, fps } from "./game-engine";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 
 const keys: Map<string, boolean | undefined> = new Map();
-
-const { floor } = Math;
 
 const game = new Sandbox();
 const player = new Entity();
@@ -22,6 +21,9 @@ let tilemap: Tilemap = new Tilemap(0, 0);
 {
   let width = Math.floor(Math.random() * 48) + 16;
   let height = Math.floor(Math.random() * 48) + 16;
+
+  width = 128;
+  height = 128;
 
   tilemap = new Tilemap(width, height);
 
@@ -40,20 +42,11 @@ let tilemap: Tilemap = new Tilemap(0, 0);
 }
 
 function main() {
-  loop();
+  init(update, draw);
 }
 
-function loop() {
-  update();
-
-  draw();
-
-  requestAnimationFrame(loop);
-}
-
-function update() {
+function update(dt: number) {
   let speed = 10;
-  let dt = 1 / 60;
 
   let dx = 0;
   let dy = 0;
@@ -64,40 +57,15 @@ function update() {
   if (keys.has("ArrowRight")) dx++;
   if (keys.has("ArrowDown")) dy++;
 
-  // if (dx) dy /= 2;
-
-  [dx, dy] = toIso(dx, dy);
-
-  // Minimap movement
-  if (keys.has("a")) dx--;
-  if (keys.has("w")) dy--;
-  if (keys.has("d")) dx++;
-  if (keys.has("s")) dy++;
-
   if (dx || dy) {
-    player.x += dx * speed * dt;
+    let n = Math.hypot(dx, dy);
 
-    if (dx < 0) {
-      if (entityHasEdgeCollision(tilemap, player, "left")) {
-        alignEntityEdge(player, "left");
-      }
-    } else if (dx > 0) {
-      if (entityHasEdgeCollision(tilemap, player, "right")) {
-        alignEntityEdge(player, "right");
-      }
-    }
+    dx /= n;
+    dy /= n;
 
-    player.y += dy * speed * dt;
+    [dx, dy] = toIso(dx, dy);
 
-    if (dy < 0) {
-      if (entityHasEdgeCollision(tilemap, player, "top")) {
-        alignEntityEdge(player, "top");
-      }
-    } else if (dy > 0) {
-      if (entityHasEdgeCollision(tilemap, player, "bottom")) {
-        alignEntityEdge(player, "bottom");
-      }
-    }
+    moveEntity(tilemap, player, speed * dx * dt, speed * dy * dt);
   }
 }
 
@@ -128,7 +96,7 @@ function draw() {
   ctx.fill();
 
   // Debug draw an ortho minimap
-  {
+  /*{
     let scale = 7;
 
     ctx.resetTransform();
@@ -143,6 +111,18 @@ function draw() {
 
     ctx.fillStyle = "yellow";
     ctx.fillRect(player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
+  }*/
+
+  // Debug display the FPS
+  {
+    ctx.resetTransform();
+
+    ctx.fillStyle = "white";
+    ctx.fillRect(8, 8, 16 * 10, 32)
+
+    ctx.fillStyle = "black";
+    ctx.font = "16px sans-serif";
+    ctx.fillText(Math.floor(fps * 10) / 10 + " FPS", 16, 32)
   }
 }
 

@@ -1,13 +1,11 @@
-import { toOrtho, toWorld } from "./math";
-
-import { SPRITE_WIDTH, SPRITE_HEIGHT } from "./constants";
+import { SPRITE_WIDTH, SPRITE_HEIGHT, toWorld } from "./utils";
 import { Tilemap } from "./tilemap";
 
 export class Entity {
   public x = 0;
   public y = 0;
-  public width = 0.9;
-  public height = 0.9;
+  public width = 0.75;
+  public height = 0.75;
 
   public update(dt: number, keys: Map<string, boolean | undefined>): void {
 
@@ -59,7 +57,7 @@ export class Entity {
 
     // Draw the sprite
     ctx.fillStyle = "red";
-    // ctx.fillRect(x - SPRITE_WIDTH / 4, y - SPRITE_HEIGHT / 2, SPRITE_WIDTH / 2, SPRITE_HEIGHT / 2);
+    ctx.fillRect(x - SPRITE_WIDTH / 4, y - SPRITE_HEIGHT / 2, SPRITE_WIDTH / 2, SPRITE_HEIGHT / 2);
 
     // Debug draw the origin
     ctx.fillStyle = "blue";

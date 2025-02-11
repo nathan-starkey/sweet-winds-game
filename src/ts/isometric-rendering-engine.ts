@@ -1,4 +1,4 @@
-import { SPRITE_HEIGHT, SPRITE_WIDTH } from "./constants";
+import { SPRITE_HEIGHT, SPRITE_WIDTH } from "./utils";
 
 const { min, max, floor } = Math;
 
