@@ -1,4 +1,4 @@
-import { Entity } from "./entity";
+import { TILES } from "../tiles";
 import { Tilemap } from "./tilemap";
 
 const { floor, ceil } = Math;
@@ -6,6 +6,13 @@ const { floor, ceil } = Math;
 const EPSILON = 0.0001;
 
 type Edge = "left" | "top" | "right" | "bottom";
+
+type Entity = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
 /** Iterate each tile that the given edge intersects. */
 function* iterateEntityEdge(entity: Entity, edge: Edge): Generator<[x: number, y: number]> {
@@ -27,7 +34,14 @@ function* iterateEntityEdge(entity: Entity, edge: Edge): Generator<[x: number, y
 
 /** Determine if the given edge intersects a solid tile. */
 function entityHasEdgeCollision(tilemap: Tilemap, entity: Entity, edge: Edge) {
-  for (let [x, y] of iterateEntityEdge(entity, edge)) if (tilemap.at(x, y) == 1) return true;
+  for (let [x, y] of iterateEntityEdge(entity, edge)) {
+    let index = tilemap.at(x, y);
+    let tile = TILES[index];
+
+    if (!tile || tile.isSolid) {
+      return true;
+    }
+  }
 
   return false;
 }

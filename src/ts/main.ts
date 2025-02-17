@@ -1,26 +1,23 @@
-import { Entity } from "./entity";
-import { Sandbox } from "./sandbox";
-import { toIso } from "./utils";
-import { Tilemap } from "./tilemap";
-import { moveEntity } from "./tilemap-collision";
-import { init } from "./game-engine";
-import { Node, createNodeTree, debugDrawNodeTree, generateTilemap } from "./tilemap-generation";
+import { Sandbox } from "./sandbox/sandbox";
+import { Tilemap } from "./tilemap/tilemap";
+import { fps, init } from "./game-engine";
+import { generateLevel } from "./level-generation/generate-level";
+import { Entity } from "./sandbox/entity";
+import { Node, createNodeTree } from "./level-generation/create-node-tree";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-const ctx = canvas.getContext("2d")!;
+const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
 
-const keys: Map<string, boolean | undefined> = new Map();
-
-const game = new Sandbox();
+const sandbox = new Sandbox();
 const player = new Entity();
 
-game.addEntity(player);
+sandbox.addEntity(player);
 
 // Debug tilemap generation code
 let nodes: Node[] = createNodeTree(20);
-let tilemap: Tilemap = generateTilemap(nodes); // new Tilemap(0, 0);
+let tilemap: Tilemap = generateLevel(nodes); // new Tilemap(0, 0);
 
-game.setTilemap(tilemap);
+sandbox.tilemap = tilemap;
 
 // Debug spawn code
 let x = 0;
@@ -39,27 +36,7 @@ function main() {
 }
 
 function update(dt: number) {
-  let speed = 10;
-
-  let dx = 0;
-  let dy = 0;
-
-  // World movement
-  if (keys.has("ArrowLeft")) dx--;
-  if (keys.has("ArrowUp")) dy--;
-  if (keys.has("ArrowRight")) dx++;
-  if (keys.has("ArrowDown")) dy++;
-
-  if (dx || dy) {
-    let n = Math.hypot(dx, dy);
-
-    dx /= n;
-    dy /= n;
-
-    [dx, dy] = toIso(dx, dy);
-
-    moveEntity(tilemap, player, speed * dx * dt, speed * dy * dt);
-  }
+  sandbox.update(dt);
 }
 
 
@@ -70,7 +47,7 @@ function draw() {
   ctx.imageSmoothingEnabled = false;
 
   // Set the background color
-  ctx.fillStyle = "gray";
+  ctx.fillStyle = "#10121C";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Align to the center of the screen
@@ -82,11 +59,13 @@ function draw() {
 
     if (ratio < 1) ratio = 1 / ratio;
 
+    ratio = Math.round(ratio);
+
     ctx.scale(ratio, ratio);
   }
 
   // Draw the sandbox
-  game.draw(ctx);
+  sandbox.draw(ctx);
 
   // Debug draw the world origin
   ctx.fillStyle = "purple";
@@ -95,6 +74,24 @@ function draw() {
   ctx.fill();
 
   ctx.resetTransform();
+
+  // Post processing experiment:
+
+  /*
+  let imageData: ImageData = ctx.getImageData(0, 0, canvas.width / 2, canvas.height / 2);
+
+  for (let n = 0; n < imageData.data.length; n += 4) {
+    let i = n / 4;
+    let x = i % imageData.width;
+    let y = Math.floor(i / imageData.width);
+
+    imageData.data[n + 0] /= 2;
+    imageData.data[n + 1] /= 2;
+    imageData.data[n + 2] /= 2;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+  */
 
   // Debug draw an ortho minimap
   /*{
@@ -114,14 +111,14 @@ function draw() {
   }*/
 
   // Debug display the FPS
-  /*{
+  {
     ctx.fillStyle = "white";
     ctx.fillRect(8, 8, 16 * 10, 32)
 
     ctx.fillStyle = "black";
     ctx.font = "16px sans-serif";
     ctx.fillText(Math.floor(fps * 10) / 10 + " FPS", 16, 32)
-  }*/
+  }
 
   // Debug display the tilemap generation
   // ctx.scale(10, 10);
@@ -130,9 +127,3 @@ function draw() {
 }
 
 window.addEventListener("load", main);
-
-window.addEventListener("keydown", ev => keys.set(ev.key, true));
-
-window.addEventListener("keyup", ev => keys.delete(ev.key));
-
-window.addEventListener("blur", ev => keys.clear());

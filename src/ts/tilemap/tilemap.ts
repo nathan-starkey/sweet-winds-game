@@ -1,4 +1,20 @@
-export class Tilemap {
+export interface IReadonlyTilemap {
+  readonly data: readonly number[];
+  readonly width: number;
+  readonly height: number;
+
+  has(x: number, y: number): boolean;
+
+  at(x: number, y: number, fallback?: number): number;
+}
+
+export interface ITilemap extends IReadonlyTilemap {
+  data: number[];
+
+  put(x: number, y: number, value: number): void;
+}
+
+export class Tilemap implements ITilemap {
   public data: number[];
 
   constructor(
